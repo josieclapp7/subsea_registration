@@ -19,17 +19,17 @@ import numpy as np
 import copy
 
 # -------- CONFIG --------------------------------------------------------------------------------------------
-e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1447/SP33"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1447/SP33"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP411"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP01"
-# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP414"
+e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP414"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP02"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP412"
 
 
 #convert the e57s to pcds
 # convert_e57_to_pcd(e57_SP_folder)
-voxel_size = 0.01
+voxel_size = 0.005
 max_correspondence_distance_coarse = voxel_size * 15
 max_correspondence_distance_fine = voxel_size * 5 
 # ------------------------------------------------------------------------------------------------------------

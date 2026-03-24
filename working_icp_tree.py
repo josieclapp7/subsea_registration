@@ -99,7 +99,7 @@ def refine_registration(source, target, init_transformation, voxel_size, plane=T
         )
     return result_icp
 
-def execute_icp(cloud1, cloud2, voxel_size, show=False, plane=True):
+def execute_icp(cloud1, cloud2, voxel_size, show=True, plane=True):
     '''Executes point-to-plane or point-to-point registration '''
     print(f"\tExecute ICP -- With Show: {show}")
     # No global registration, starts with the indentity matrix
@@ -135,7 +135,7 @@ def execute_icp(cloud1, cloud2, voxel_size, show=False, plane=True):
     rmse_list.append(result_icp.inlier_rmse)
     return np.linalg.inv(result_icp.transformation)
 
-def compute_transform_between(cloud_ref, cloud_mov, voxel_size, show=False):
+def compute_transform_between(cloud_ref, cloud_mov, voxel_size, show=True):
     '''
     Calls your gicp.register function and returns a 4x4 matrix mapping cloud_mov -> cloud_ref.
     Expects gicp.execute_global_and_icp(...) to return a numpy 4x4 matrix.
@@ -161,7 +161,7 @@ def register_pairs_entries(entry_list, reverse=False):
         print(f"Pair-registering groups: {e1['id']}  <---  {e2['id']}")
         cloud_ref = build_combined_cloud(e1["members"], original_clouds, final_transforms)
         cloud_mov = build_combined_cloud(e2["members"], original_clouds, final_transforms)
-        T_mov2ref = compute_transform_between(cloud_ref, cloud_mov, voxel_size, show=False)
+        T_mov2ref = compute_transform_between(cloud_ref, cloud_mov, voxel_size, show=True)
         # rmse_list.append(T_mov2ref.inlier_rmse)
         # update transforms
         for fname in e2["members"]:
@@ -188,9 +188,9 @@ def color_from_name(name):
     return [rnd.random(), rnd.random(), rnd.random()]
 
 # -------- CONFIG --------------------------------------------------------------------------------------------
-# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1447/SP33"
+e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1447/SP33"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP411"
-e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP01"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP01"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP414"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP01"
 # e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP412"
@@ -267,7 +267,7 @@ while i < len(entries):
             print(f"Registering duplicate pair: {a['members']}  <---  {b['members']}  (Pan {a['Pan']}, Tilt {a['Tilt']})")
             cloud_a = build_combined_cloud(a["members"], original_clouds, final_transforms)
             cloud_b = build_combined_cloud(b["members"], original_clouds, final_transforms)
-            T_b2a = compute_transform_between(cloud_a, cloud_b, voxel_size, show=False)
+            T_b2a = compute_transform_between(cloud_a, cloud_b, voxel_size, show=True)
             # rmse_list.append(T_b2a.inlier_rmse)
             # update global transforms for every member in b:
             for fname in b["members"]:
@@ -307,7 +307,7 @@ for pan, group in entries_by_pan.items():
         print(f"Registering additional tilt {additional['members']} onto base {base['members']} (Pan {pan})")
         cloud_base = build_combined_cloud(base["members"], original_clouds, final_transforms)
         cloud_add = build_combined_cloud(additional["members"], original_clouds, final_transforms)
-        T_add2base = compute_transform_between(cloud_base, cloud_add, voxel_size, show=False)
+        T_add2base = compute_transform_between(cloud_base, cloud_add, voxel_size, show=True)
         # rmse_list.append(T_add2base.inlier_rmse)
         # update transforms for all members in 'add'
         for fname in additional["members"]:
