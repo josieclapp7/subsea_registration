@@ -1,57 +1,48 @@
-from dataclasses import dataclass, field
-import numpy as np
-import open3d as o3d
+'''
+Notes:
+    - Choose if the e57s need to be converted or if they are already pcds
+'''
 
-@dataclass
-class RegistrationConfig:
-    voxel_size: float = 0.005
-    edge_prune_threshold: float = 0.25
-    reference_node: int = 0
+import multiway_functions_class as mf
+import copy
+import winsound
 
-    @property
-    def coarse_distance(self) -> float:
-        return self.voxel_size * 15
-
-    @property
-    def fine_distance(self) -> float:
-        return self.voxel_size * 5
-
-    @property
-    def rmse_threshold(self) -> float:
-        return self.voxel_size * 0.4
+# -------- CONFIG --------------------------------------------------------------------------------------------
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1447/SP33"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP411"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP01"
+e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP414"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1580/Jumper 001-selected/SP02"
+# e57_SP_folder = "C:/Users/josie/Documents/_Senior Project/senior_project/full_scan_cleaned/1601/SP412"
 
 
-@dataclass
-class ScanPair:
-    source_id: int
-    target_id: int
-    transformation: np.ndarray
-    information: np.ndarray
-    inlier_rmse: float
-    is_adjacent: bool  # False = loop closure edge
+config = mf.RegistrationConfig(voxel_size=0.005, edge_prune_threshold=0.25, reference_node=0, use_point_to_plane=True)
+OUTPUT_TRANSFORMS_FILE = "final_transforms_1601.txt"
+# ------------------------------------------------------------------------------------------------------------
 
+# Convert the e57s to pcds
+# convert_e57_to_pcd(e57_SP_folder)
+ 
+# Load point clouds 
+pcd_SP_folder = e57_SP_folder + '/pcd_files'
 
-@dataclass
-class RegistrationResult:
-    filenames: list[str]
-    pose_graph: o3d.pipelines.registration.PoseGraph
-    transformed_clouds: list[o3d.geometry.PointCloud]
-    rmse_values: list[float]
-    avg_rmse: float
-    std_rmse: float
-    elapsed_seconds: float
+loader = mf.PointCloudLoader(pcd_SP_folder, config)
+loader.discover().load()
 
-    def print_summary(self):
-        print(f"Time: {self.elapsed_seconds / 60:.2f} min")
-        print(f"Avg RMSE: {self.avg_rmse:.6f}  Std: {self.std_rmse:.6f}")
-        for fname, rmse in zip(self.filenames, self.rmse_values):
-            print(f"  {fname}: {rmse:.6f}")
+original_clouds = [copy.deepcopy(pc) for pc in loader.clouds]
 
-    def save_transforms(self, path: str):
-        with open(path, "w") as f:
-            f.write("FINAL TRANSFORMS (cloud -> global)\n\n")
-            for i, fname in enumerate(self.filenames):
-                T = self.pose_graph.nodes[i].pose
-                f.write(f"--- {fname} ---\n")
-                f.write(np.array2string(T, formatter={'float_kind': lambda x: f"{x:.6f}"}))
-                f.write("\n\n")
+# Register
+solver = mf.MultiwaySolver(config)
+result = solver.run(clouds=loader.clouds, filenames=loader.filenames, original_clouds=original_clouds)
+
+# Output
+result.print_summary()
+result.print_transforms()
+# result.save_transforms(OUTPUT_TRANSFORMS_FILE)
+
+winsound.Beep(2500, 1000)
+
+# Assign Colors and vizualize
+result.colorize()
+result.visualize_original()
+result.visualize_registered()
